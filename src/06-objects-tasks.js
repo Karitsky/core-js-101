@@ -1,6 +1,6 @@
 /* ************************************************************************************************
  *                                                                                                *
- * Plese read the following tutorial before implementing tasks:                                   *
+ * Please read the following tutorial before implementing tasks:                                   *
  * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Object_initializer *
  * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object        *
  *                                                                                                *
@@ -8,7 +8,7 @@
 
 
 /**
- * Returns the rectagle object with width and height parameters and getArea() method
+ * Returns the rectangle object with width and height parameters and getArea() method
  *
  * @param {number} width
  * @param {number} height
@@ -20,8 +20,10 @@
  *    console.log(r.height);      // => 20
  *    console.log(r.getArea());   // => 200
  */
-function Rectangle(/* width, height */) {
-  throw new Error('Not implemented');
+function Rectangle(width, height) {
+  this.width = width;
+  this.height = height;
+  this.getArea = () => this.width * this.height;
 }
 
 
@@ -35,8 +37,8 @@ function Rectangle(/* width, height */) {
  *    [1,2,3]   =>  '[1,2,3]'
  *    { width: 10, height : 20 } => '{"height":10,"width":20}'
  */
-function getJSON(/* obj */) {
-  throw new Error('Not implemented');
+function getJSON(obj) {
+  return JSON.stringify(obj);
 }
 
 
@@ -51,8 +53,10 @@ function getJSON(/* obj */) {
  *    const r = fromJSON(Circle.prototype, '{"radius":10}');
  *
  */
-function fromJSON(/* proto, json */) {
-  throw new Error('Not implemented');
+function fromJSON(proto, json) {
+  const obj = JSON.parse(json);
+  Object.setPrototypeOf(obj, proto);
+  return obj;
 }
 
 
@@ -70,7 +74,7 @@ function fromJSON(/* proto, json */) {
  *
  * The task is to design a single class, independent classes or classes hierarchy
  * and implement the functionality to build the css selectors using the provided cssSelectorBuilder.
- * Each selector should have the stringify() method to output the string repsentation
+ * Each selector should have the stringify() method to output the string representation
  * according to css specification.
  *
  * Provided cssSelectorBuilder should be used as facade only to create your own classes,
@@ -111,32 +115,64 @@ function fromJSON(/* proto, json */) {
  */
 
 const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
+  selector: '',
+  verification: 0,
+  error1: 'Element, id and pseudo-element should not occur more then one time inside the selector',
+  error2: 'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element',
+  createInstance(value, n) {
+    const instance = { ...cssSelectorBuilder };
+    instance.selector = `${value}`;
+    instance.verification = n;
+    return instance;
   },
 
-  id(/* value */) {
-    throw new Error('Not implemented');
+  verify(value) {
+    if (value < this.verification) {
+      throw new Error(this.error2);
+    }
+    if (value === 1 || value === 2 || value === 6) {
+      if (value === this.verification) {
+        throw new Error(this.error1);
+      }
+    }
   },
 
-  class(/* value */) {
-    throw new Error('Not implemented');
+  element(value) {
+    this.verify(1);
+    return this.createInstance(`${this.selector}${value}`, 1);
   },
 
-  attr(/* value */) {
-    throw new Error('Not implemented');
+  id(value) {
+    this.verify(2);
+    return this.createInstance(`${this.selector}#${value}`, 2);
   },
 
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
+  class(value) {
+    this.verify(3);
+    return this.createInstance(`${this.selector}.${value}`, 3);
   },
 
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
+  attr(value) {
+    this.verify(4);
+    return this.createInstance(`${this.selector}[${value}]`, 4);
   },
 
-  combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
+  pseudoClass(value) {
+    this.verify(5);
+    return this.createInstance(`${this.selector}:${value}`, 5);
+  },
+
+  pseudoElement(value) {
+    this.verify(6);
+    return this.createInstance(`${this.selector}::${value}`, 6);
+  },
+
+  combine(selector1, combinator, selector2) {
+    return this.createInstance(`${selector1.stringify()} ${combinator} ${selector2.stringify()}`);
+  },
+
+  stringify() {
+    return this.selector;
   },
 };
 
